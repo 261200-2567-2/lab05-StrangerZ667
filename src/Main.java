@@ -1,10 +1,10 @@
 public class Main {
     public static void main(String[] args) {
-        RPGCharacter slime = new RPGCharacter(1, 8.0);
-        RPGCharacter ghoul = new RPGCharacter(2, 1.0);
+        RPGCharacter slime = new RPGCharacter(1, 8.0); // Level 1 with base run speed 8.0
+        RPGCharacter ghoul = new RPGCharacter(2, 1.0); // Level 2 with base run speed 1.0
         RPGCharacter character = new RPGCharacter(5, 10.0); // Level 5 with base run speed 10.0
         Sword sword = new Sword(15.0); // Sword with base damage 15
-        Sword monsword = new Sword(10.0); // Sword with base damage 15
+        Sword monsword = new Sword(10.0); // Sword with base damage 10
         Shield shield = new Shield(10.0); // Shield with base defense 10
 
         // Equip sword and shield
@@ -15,28 +15,65 @@ public class Main {
 
         // Display character stats
         character.getstat(character);
-        System.out.println("Slime Run Speed: " + slime.getRunSpeed());
         System.out.println("----------------------------------------");
 
-        character.fight(character, slime);
-        character.unequipShield();
-        System.out.println("After Unequip Shield Run Speed: " + character.getRunSpeed());
-        character.fight(character, slime);
-        sword.baseDamage = 1000.0;
-        character.fight(character, slime);
+        // debug for BleedTouch
+        character.fight(character,ghoul);
+        character.BleedTouch(character,ghoul);
+        System.out.println(character.getMaxHP());
+        System.out.println(ghoul.getMaxHP());
+        System.out.println("----------------------------------------");
+
+        // debug for Healing
+        character.Healing();
+        System.out.println(character.getMaxHP());
+        System.out.println("----------------------------------------");
+
+        // debug for ReadScroll
+        character.ReadScroll();
+        System.out.println("----------------------------------------");
         character.getstat(character);
         System.out.println("----------------------------------------");
-        sword.baseDamage = 15.0;
-        character.fight(character, slime);
-        System.out.println("Run Speed: " + character.getRunSpeed());
-        character.equipShield(shield);
-        System.out.println("After Shield Run Speed: " + character.getRunSpeed());
-        System.out.println("Ghoul Run Speed: " + ghoul.getRunSpeed());
+
+        // debug for StoneSkin
+        character.StoneSkin(character);
+        character.getstat(character);
         System.out.println("----------------------------------------");
-        character.fight(character, ghoul);
-        sword.baseDamage = 1000.0;
-        character.fight(character, ghoul);
-        sword.baseDamage = 15.0;
+        character.fight(character,ghoul);
+        character.getstat(character);
+        System.out.println("----------------------------------------");
+
+        // debug for Summon and Dust
+        character.Summon(character);
+        character.Dust();
+        character.getstat(character);
+        System.out.println("----------------------------------------");
+        character.fight(character,ghoul);
+        character.getstat(character);
+        System.out.println("----------------------------------------");
+
+        // debug for Pulse
+        System.out.println(ghoul.getMaxHP());
+        character.Pulse(ghoul);
+        System.out.println(ghoul.getMaxHP());
+        System.out.println("----------------------------------------");
+
+        // debug for Ritual
+        System.out.println(character.getMaxHP());
+        System.out.println(ghoul.getMaxHP());
+        character.Ritual(character,ghoul);
+        System.out.println(character.getMaxHP());
+        System.out.println(ghoul.getMaxHP());
+        System.out.println("----------------------------------------");
+
+        // debug for Demolish
+        character.volcanicDemolish(ghoul);
+        System.out.println(ghoul.getMaxHP());
+        character.getstat(character);
+        System.out.println("----------------------------------------");
+        character.ReadScroll();
+        character.fight(character,ghoul);
+        System.out.println("----------------------------------------");
         character.getstat(character);
         System.out.println("----------------------------------------");
     }
