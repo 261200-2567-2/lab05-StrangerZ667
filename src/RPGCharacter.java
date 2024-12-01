@@ -1,89 +1,89 @@
 public class RPGCharacter implements MainCharacter, Summon, VolcanicRing, SoulTalisman {
 
-    // Each character own stats and items for uses
-    private int level;
-    private double maxHP;
-    private double maxMana;
-    private double baseRunSpeed;
-    private int flask = 8;
-    private int scroll = 4;
+    // Fields for stats and items
+    private int level; // Character's level; side effects: leveling up adjusts stats (maxHP and maxMana).
+    private double maxHP; // Maximum HP; affected by healing and damage.
+    private double maxMana; // Maximum Mana; consumed by skills and affects spell usage.
+    private double baseRunSpeed; // Base running speed; used in calculations of current run speed.
+    private int flask = 8; // Healing item count; decrement affects healing capability.
+    private int scroll = 4; // Special stat-reset item count; decrement affects usability.
 
     // Equipments for each character
-    public Sword sword;
-    public Shield shield;
+    public Sword sword; // Sword equipped; affects attack damage and speed penalties.
+    public Shield shield; // Shield equipped; affects defense and speed penalties.
 
     // Turn for every buff that last for an amount of time
-    private int turn = 0;
+    private int turn = 0; // Tracks how many turns buffs/debuffs are active; side effects on stat changes.
 
     // Summon's Mana
-    private double Mana = 0;
+    private double Mana = 0; // Mana for summon skills; affects usability of summon-based skills.
 
     // States for every situation to check either it do something or not
-    private boolean StoneSkinOn = false;
-    private boolean DustOn = false;
-    private boolean SumOn = false;
-    private boolean BleedOn = false;
-    private boolean VR = true;
-    private boolean ST = true;
+    private boolean StoneSkinOn = false; // If true, buffs defense; resets when duration ends.
+    private boolean DustOn = false; // If true, buffs sword damage; resets when duration ends.
+    private boolean SumOn = false; // If true, indicates summon is active.
+    private boolean BleedOn = false; // Tracks bleeding status (currently unused but could impact HP).
+    private boolean VR = true; // If false, Volcanic Ring has been destroyed; limits skill usage.
+    private boolean ST = true; // If false, Soul Talisman has been destroyed; limits skill usage.
 
-    // Constructor
+    // Constructor:  Initializes stats and recalculates based on level
     public RPGCharacter(int level, double baseRunSpeed) {
         this.level = level;
         this.baseRunSpeed = baseRunSpeed;
-        calculateStats();
+        calculateStats(); // Updates maxHP and maxMana based on level; any stat recalculation errors propagate.
     }
 
-    // Calculate stats based on level
+    // Calculates stats; side effects: updates maxHP and maxMana
     private void calculateStats() {
-        this.maxHP = 100 + 10 * level;
-        this.maxMana = 50 + 2 * level;
+        this.maxHP = 100 + 10 * level; // Increases HP based on level.
+        this.maxMana = 50 + 2 * level; // Increases Mana based on level.
     }
 
     // Equip a sword
     public void equipSword(Sword sword) {
-        this.sword = sword;
+        this.sword = sword; // Affects attack damage and running speed penalties.
     }
 
     // Equip a shield
     public void equipShield(Shield shield) {
-        this.shield = shield;
+        this.shield = shield; // Affects defense and running speed penalties.
     }
 
     // Unequip a shield
     public void unequipShield() {
-        this.shield = null;
+        this.shield = null; // Removes defense bonus and running speed penalty.
     }
 
     // Unequip a sword
     public void unequipSword() {
-        this.sword = null;
+        this.sword = null; // Removes attack bonus and running speed penalty.
     }
 
-    // Get damage dealt by sword
+    // Damage calculation from sword
     public double getSwordDamage() {
-        if (sword == null) return 0;
-        return sword.getBaseDamage() * (1 + 0.1 * level);
+        if (sword == null) return 0; // No sword means no damage.
+        return sword.getBaseDamage() * (1 + 0.1 * level); // Side effect: damage scales with level.
     }
 
-    // Get defense provided by shield
+    // Defense calculation from shield
     public double getShieldDefense() {
-        if (shield == null) return 0;
-        return shield.getBaseDefense() * (1 + 0.05 * level);
+        if (shield == null) return 0; // No shield means no defense.
+        return shield.getBaseDefense() * (1 + 0.05 * level); // Side effect: defense scales with level.
     }
 
-    // Calculate current run speed
+    // Calculates current run speed; affected by level and equipment penalties
     public double getRunSpeed() {
-        double runSpeed = baseRunSpeed * (1 + 0.03 * level);
+        double runSpeed = baseRunSpeed * (1 + 0.03 * level); // Scales with level.
 
         if (sword != null) {
-            runSpeed -= (baseRunSpeed * (0.1 + 0.04 * level));
+            runSpeed -= (baseRunSpeed * (0.1 + 0.04 * level)); // Side effect: decreases speed with sword.
         }
 
         if (shield != null) {
-            runSpeed -= (baseRunSpeed * (0.1 + 0.08 * level));
+            runSpeed -= (baseRunSpeed * (0.1 + 0.08 * level)); // Side effect: decreases speed with shield.
         }
 
-        return runSpeed;
+        return runSpeed; // Running slower could prevent actions like attacking.
     }
 
     // Getters
@@ -99,13 +99,13 @@ public class RPGCharacter implements MainCharacter, Summon, VolcanicRing, SoulTa
         return maxMana;
     }
 
-    // Level up the character
+    // Level up; side effect: boosts level, recalculates stats
     public void levelUp() {
         level++;
-        calculateStats();
+        calculateStats(); // Updates maxHP and maxMana after leveling up.
     }
 
-    // Fight function is the main action
+    // Fight: Main combat logic; side effects include HP, Mana, and level changes
     public void fight(RPGCharacter character, RPGCharacter slime) {
         if(character.getRunSpeed() >= slime.getRunSpeed() && character.maxMana >= 8){ // Can attack monster when your speed is higher than monster
             character.maxMana -= 8; // Every attack use your own mana for 8 to cast attack
@@ -122,7 +122,7 @@ public class RPGCharacter implements MainCharacter, Summon, VolcanicRing, SoulTa
                 else System.out.println("You don't have shield so you will took " + slime.getSwordDamage() + " damage and have " + character.getMaxHP() + " hp left");
                 System.out.println("You hit him for " + character.getSwordDamage() + " damage and " + "it has only " + slime.maxHP + " hp left");
                 System.out.println("----------------------------------------");
-                // Every buff is calculated here and last for its own time
+                // Buff effects diminish over turns
                 if(turn != 0){
                     if(StoneSkinOn) shield.baseDefense -= 2;
                     if(DustOn) sword.baseDamage -= 2;
@@ -138,7 +138,7 @@ public class RPGCharacter implements MainCharacter, Summon, VolcanicRing, SoulTa
         else  System.out.println("Please unequip something, you heavy af can't even hit a single thing");
     }
 
-    // Display all of your own stats especially for debug
+    // Display stats; side effect: purely for debugging
     public void getstat(RPGCharacter character){
         System.out.println("Level: " + character.getLevel());
         System.out.println("Max HP: " + character.getMaxHP());
@@ -148,12 +148,12 @@ public class RPGCharacter implements MainCharacter, Summon, VolcanicRing, SoulTa
         System.out.println("Run Speed: " + character.getRunSpeed());
     }
 
-    // Healing function from MainCharacter interface
+    // Healing function; side effect: consumes flask, restores HP
     @Override
     public void Healing(){
         if(flask > 0) {
             flask -= 1; // Use 1 flask for 20 HP
-            maxHP += 20;
+            maxHP += 20; // Restores 20 HP; potential for overhealing.
             System.out.println("You have used your flask to heal for 20 HP");
         }
         else System.out.println("You don't have any flasks in your inventory");
